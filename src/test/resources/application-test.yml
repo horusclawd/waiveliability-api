@@ -1,0 +1,19 @@
+spring:
+  flyway:
+    enabled: true
+  jpa:
+    show-sql: false
+
+app:
+  jwt:
+    secret: test-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256!!
+    access-token-expiry: 900
+    refresh-token-expiry: 604800
+  aws:
+    region: us-east-1
+    s3:
+      bucket: test-bucket
+      endpoint: ""
+  stripe:
+    secret-key: ""
+    webhook-secret: ""
