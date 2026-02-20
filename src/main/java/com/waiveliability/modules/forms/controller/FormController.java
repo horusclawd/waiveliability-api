@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,5 +66,11 @@ public class FormController {
     @PostMapping("/{id}/unpublish")
     public ResponseEntity<FormResponse> unpublishForm(@PathVariable UUID id) {
         return ResponseEntity.ok(formService.unpublishForm(TenantContext.current(), id));
+    }
+
+    @PostMapping("/{id}/duplicate")
+    @ResponseStatus(HttpStatus.CREATED)
+    public FormResponse duplicateForm(@PathVariable UUID id) {
+        return formService.duplicateForm(TenantContext.current(), id);
     }
 }
