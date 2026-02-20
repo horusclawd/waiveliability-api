@@ -136,6 +136,37 @@ public class FormService {
         return toFormResponse(form);
     }
 
+    public FormResponse duplicateForm(UUID tenantId, UUID formId) {
+        Form original = formRepository.findByIdAndTenantId(formId, tenantId)
+            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Form not found"));
+        Tenant tenant = tenantRepository.findById(tenantId)
+            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Tenant not found"));
+
+        Form copy = Form.builder()
+            .tenant(tenant)
+            .name("Copy of " + original.getName())
+            .description(original.getDescription())
+            .status("draft")
+            .build();
+        formRepository.save(copy);
+
+        List<FormField> originalFields = formFieldRepository.findByFormIdOrderByFieldOrder(formId);
+        List<FormField> copiedFields = originalFields.stream().map(f ->
+            FormField.builder()
+                .form(copy)
+                .fieldType(f.getFieldType())
+                .label(f.getLabel())
+                .placeholder(f.getPlaceholder())
+                .required(f.isRequired())
+                .fieldOrder(f.getFieldOrder())
+                .options(f.getOptions())
+                .build()
+        ).toList();
+        formFieldRepository.saveAll(copiedFields);
+
+        return toFormResponse(copy);
+    }
+
     // --- helpers ---
 
     private FormResponse toFormResponse(Form form) {
