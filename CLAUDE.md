@@ -1,7 +1,7 @@
 # WaiveLiability API — Claude Instructions
 
 ## Project
-Spring Boot 3.3 / Java 21 backend for WaiveLiability. See the full architecture and roadmap in the sibling docs repo:
+Spring Boot 3.3 / Java 21 backend for WaiveLiability. At the start of every session, before doing any work, read both of these files:
 - `/Users/jon/Development/waiveliability/waiveliability/ARCHITECTURE.md`
 - `/Users/jon/Development/waiveliability/waiveliability/ROADMAP.md`
 
