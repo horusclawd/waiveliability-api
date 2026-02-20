@@ -1,0 +1,23 @@
+spring:
+  jpa:
+    show-sql: false
+
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+
+logging:
+  level:
+    root: WARN
+    com.waiveliability: INFO
+
+server:
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain
+
+management:
+  endpoint:
+    health:
+      show-details: when-authorized
