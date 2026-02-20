@@ -39,4 +39,7 @@ public class TenantBranding {
     @Column(name = "hide_powered_by", nullable = false)
     @Builder.Default
     private boolean hidePoweredBy = false;
+
+    // custom_domain and domain_verified columns exist in the DB (V4 migration)
+    // and will be mapped when the custom domain feature is implemented (Sprint 12).
 }

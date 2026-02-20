@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,7 +41,9 @@ public class BusinessService {
     @Transactional(readOnly = true)
     public BusinessResponse getBusiness(UUID tenantId) {
         Tenant tenant = requireTenant(tenantId);
-        TenantBranding branding = getOrCreateBranding(tenant);
+        // Use orElse(emptyBranding) on reads — avoid a write on every GET
+        TenantBranding branding = tenantBrandingRepository.findById(tenantId)
+            .orElse(emptyBranding(tenant));
         return toBusinessResponse(tenant, branding);
     }
 
@@ -69,7 +70,6 @@ public class BusinessService {
         return toBusinessResponse(tenant, branding);
     }
 
-    @CheckPlanLimit(feature = PlanFeature.CUSTOM_BRANDING)
     public BusinessResponse uploadLogo(UUID tenantId, MultipartFile file) {
         Tenant tenant = requireTenant(tenantId);
 
@@ -86,14 +86,10 @@ public class BusinessService {
 
         TenantBranding branding = getOrCreateBranding(tenant);
 
-        // Delete old logo if present
-        if (branding.getLogoS3Key() != null) {
-            s3Service.delete(branding.getLogoS3Key());
-        }
-
         String extension = extensionFor(contentType);
         String key = "logos/" + tenantId + "/" + UUID.randomUUID() + "." + extension;
 
+        // Upload new object first — if this fails, DB is unchanged and old logo is safe
         try {
             s3Service.upload(key, file.getInputStream(), file.getSize(), contentType);
         } catch (IOException e) {
@@ -101,8 +97,15 @@ public class BusinessService {
                 "Failed to read uploaded file", e);
         }
 
+        String oldKey = branding.getLogoS3Key();
         branding.setLogoS3Key(key);
         tenantBrandingRepository.save(branding);
+
+        // Delete old logo after DB commit — a leaked S3 object is better than a broken key in DB
+        if (oldKey != null && oldKey.startsWith("logos/" + tenantId + "/")) {
+            s3Service.delete(oldKey);
+        }
+
         return toBusinessResponse(tenant, branding);
     }
 
