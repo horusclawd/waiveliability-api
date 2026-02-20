@@ -40,6 +40,44 @@ Edit `.env` and set any required values. The defaults work for local development
 
 The API will start at http://localhost:8080
 
+## Local Development
+
+### Java Version
+
+This project requires **Java 21**. If you have multiple JDKs installed, set `JAVA_HOME` before running any Gradle commands:
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+```
+
+To make this permanent, add the line above to your `~/.zshrc` and run `source ~/.zshrc`.
+
+### Steps
+
+1. **Start infrastructure** (PostgreSQL, Redis, LocalStack):
+
+```bash
+docker-compose up -d
+```
+
+2. **Build and run the app:**
+
+```bash
+./gradlew bootRun
+```
+
+The API starts at http://localhost:8080. Verify it's healthy:
+
+```bash
+curl http://localhost:8080/actuator/health
+```
+
+3. **Run tests** (requires Docker for Testcontainers):
+
+```bash
+./gradlew test
+```
+
 ## Common Commands
 
 ```bash
