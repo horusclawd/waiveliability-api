@@ -1,0 +1,24 @@
+spring:
+  jpa:
+    show-sql: true
+
+  mail:
+    host: localhost
+    port: 1025
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+logging:
+  level:
+    com.waiveliability: DEBUG
+    org.springframework.security: DEBUG
+    org.flywaydb: INFO
+
+management:
+  endpoint:
+    health:
+      show-details: always
