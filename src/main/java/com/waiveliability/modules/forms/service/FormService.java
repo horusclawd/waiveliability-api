@@ -110,9 +110,6 @@ public class FormService {
             newFields.add(field);
         }
         formFieldRepository.saveAll(newFields);
-        form.getFields().clear();
-        form.getFields().addAll(newFields);
-
         formRepository.save(form);
         return toFormResponse(form);
     }
@@ -184,7 +181,7 @@ public class FormService {
 
     private List<FormFieldOption> deserializeOptions(String json) {
         if (json == null || json.isBlank()) {
-            return null;
+            return List.of();
         }
         try {
             return objectMapper.readValue(json, new TypeReference<List<FormFieldOption>>() {});
