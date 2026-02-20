@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record MeResponse(
-    UUID userId,
+    UUID id,
     UUID tenantId,
     String email,
     String name,
