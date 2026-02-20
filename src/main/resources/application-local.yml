@@ -2,6 +2,11 @@ spring:
   jpa:
     show-sql: true
 
+app:
+  jwt:
+    cookie-secure: false    # HTTP in local dev — Secure flag would silently drop cookies
+    cookie-same-site: Lax   # cross-port (4200→8080) requires Lax; Strict blocks cross-origin requests
+
   mail:
     host: localhost
     port: 1025

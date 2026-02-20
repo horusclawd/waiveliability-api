@@ -137,17 +137,17 @@ public class AuthService {
     private void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(jwtConfig.isCookieSecure());
         cookie.setPath("/");
         cookie.setMaxAge(maxAge);
-        cookie.setAttribute("SameSite", "Strict");
+        cookie.setAttribute("SameSite", jwtConfig.getCookieSameSite());
         response.addCookie(cookie);
     }
 
     private void clearCookie(HttpServletResponse response, String name) {
         Cookie cookie = new Cookie(name, "");
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(jwtConfig.isCookieSecure());
         cookie.setPath("/");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
