@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Form Submission</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #059669;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            background-color: #ffffff;
+            padding: 30px;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .alert-badge {
+            display: inline-block;
+            background-color: #FEF3C7;
+            color: #92400E;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .submission-details {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: 600;
+            color: #6b7280;
+        }
+        .value {
+            color: #111827;
+        }
+        .button {
+            display: inline-block;
+            background-color: #059669;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 style="margin: 0;">New Form Submission</h1>
+    </div>
+    <div class="content">
+        <span class="alert-badge">ACTION REQUIRED</span>
+
+        <p>Hello,</p>
+
+        <p>A new form submission has been received for <strong th:text="${tenantName}">Your Company</strong>.</p>
+
+        <div class="submission-details">
+            <div class="detail-row">
+                <span class="label">Form:</span>
+                <span class="value" th:text="${formName}">Form Name</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Submitter Name:</span>
+                <span class="value" th:text="${submitterName}">John Doe</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Submitter Email:</span>
+                <span class="value" th:text="${submitterEmail}">john@example.com</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Submission ID:</span>
+                <span class="value" th:text="${submissionId}">12345</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Received:</span>
+                <span class="value" th:text="${#temporals.format(submittedAt, 'MMMM d, yyyy h:mm a')}">January 1, 2024</span>
+            </div>
+        </div>
+
+        <p>Please log in to your admin dashboard to review and process this submission.</p>
+
+        <a th:href="@{${statusUrl}}" class="button">View Submission</a>
+
+        <p style="margin-top: 20px;">This is an automated notification because you have enabled email alerts for new submissions.</p>
+    </div>
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+        <p>&copy; <span th:text="${#temporals.format(#execInfo.now, 'yyyy')}">2024</span> <span th:text="${tenantName}">Company Name</span>. All rights reserved.</p>
+    </div>
+</body>
+</html>
