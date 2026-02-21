@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan Upgraded</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #7C3AED;
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            background-color: #ffffff;
+            padding: 30px;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .celebration {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .plan-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .plan-old {
+            background-color: #E5E7EB;
+            color: #374151;
+        }
+        .plan-new {
+            background-color: #7C3AED;
+            color: white;
+        }
+        .upgrade-details {
+            background-color: #F3F4F6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .arrow {
+            font-size: 24px;
+            color: #7C3AED;
+            margin: 10px 0;
+        }
+        .features-list {
+            text-align: left;
+            margin: 20px 0;
+        }
+        .features-list li {
+            margin: 8px 0;
+            color: #374151;
+        }
+        .button {
+            display: inline-block;
+            background-color: #7C3AED;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 style="margin: 0;">Plan Upgraded!</h1>
+    </div>
+    <div class="content">
+        <div class="celebration">
+            <p>Congratulations <span th:text="${tenantName}">Your Company</span>!</p>
+            <p>Your plan has been successfully upgraded.</p>
+        </div>
+
+        <div class="upgrade-details">
+            <div style="text-align: center;">
+                <div>
+                    <span class="plan-badge plan-old" th:text="${#strings.toUpperCase(oldPlan)}">FREE</span>
+                </div>
+                <div class="arrow">&darr;</div>
+                <div>
+                    <span class="plan-badge plan-new" th:text="${#strings.toUpperCase(newPlan)}">PREMIUM</span>
+                </div>
+            </div>
+        </div>
+
+        <p>Thank you for upgrading! You now have access to premium features including:</p>
+
+        <ul class="features-list">
+            <li th:if="${newPlan == 'basic' or newPlan == 'premium'}">Unlimited form submissions</li>
+            <li th:if="${newPlan == 'basic' or newPlan == 'premium'}">Up to 10 forms</li>
+            <li th:if="${newPlan == 'premium'}">Unlimited forms</li>
+            <li th:if="${newPlan == 'premium'}">CSV export functionality</li>
+            <li th:if="${newPlan == 'basic' or newPlan == 'premium'}">Email notifications for new submissions</li>
+            <li th:if="${newPlan == 'premium'}">Priority support</li>
+        </ul>
+
+        <center>
+            <a th:href="@{${featuresUrl}}" class="button">View Your Plan</a>
+        </center>
+
+        <p style="margin-top: 20px;">If you have any questions about your new plan or need help getting started, please don't hesitate to reach out to our support team.</p>
+
+        <p>Best regards,<br>
+        <strong>The WaiveLiability Team</strong></p>
+    </div>
+    <div class="footer">
+        <p>This is an automated message. Please do not reply to this email.</p>
+        <p>&copy; <span th:text="${#temporals.format(#execInfo.now, 'yyyy')}">2024</span> WaiveLiability. All rights reserved.</p>
+    </div>
+</body>
+</html>

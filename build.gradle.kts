@@ -57,6 +57,13 @@ dependencies {
     // PDF
     implementation("org.apache.pdfbox:pdfbox:3.0.3")
 
+    // Thymeleaf for email templates
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+
+    // Spring Retry
+    implementation("org.springframework.retry:spring-retry")
+    implementation("org.springframework:spring-aspects")
+
     // Document parsing (docx)
     implementation("org.apache.poi:poi-ooxml:5.2.5")
 

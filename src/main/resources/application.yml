@@ -65,6 +65,7 @@ management:
 app:
   api:
     base-path: /api/v1
+  base-url: ${APP_BASE_URL:http://localhost:4200}
   cors:
     allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
   jwt:
@@ -76,6 +77,11 @@ app:
     s3:
       bucket: ${S3_BUCKET:waiveliability-local}
       endpoint: ${S3_ENDPOINT:}      # empty in prod; set to LocalStack URL locally
+    ses:
+      access-key: ${AWS_SES_ACCESS_KEY:}
+      secret-key: ${AWS_SES_SECRET_KEY:}
+  email:
+    from: ${EMAIL_FROM:noreply@waiveliability.com}
   stripe:
     secret-key: ${STRIPE_SECRET_KEY:}
     webhook-secret: ${STRIPE_WEBHOOK_SECRET:}

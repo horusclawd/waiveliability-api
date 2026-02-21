@@ -41,6 +41,12 @@ public class Tenant {
     @Column(name = "website_url", length = 500)
     private String websiteUrl;
 
+    @Column(name = "notifications_enabled", nullable = false)
+    private Boolean notificationsEnabled = false;
+
+    @Column(name = "notification_email")
+    private String notificationEmail;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

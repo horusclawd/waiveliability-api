@@ -14,6 +14,7 @@ import com.waiveliability.modules.forms.repository.FormFieldRepository;
 import com.waiveliability.modules.forms.repository.FormRepository;
 import com.waiveliability.modules.identity.domain.Tenant;
 import com.waiveliability.modules.identity.repository.TenantRepository;
+import com.waiveliability.modules.notification.service.EmailService;
 import com.waiveliability.modules.submissions.domain.Submission;
 import com.waiveliability.modules.submissions.dto.SubmissionResponse;
 import com.waiveliability.modules.submissions.dto.SubmitFormRequest;
@@ -53,6 +54,7 @@ public class SubmissionService {
     private final S3Service s3Service;
     private final ObjectMapper objectMapper;
     private final DocumentService documentService;
+    private final EmailService emailService;
 
     public SubmissionResponse submitForm(String tenantSlug, UUID formId, SubmitFormRequest req) {
         // 1. Look up tenant by slug
@@ -105,6 +107,15 @@ public class SubmissionService {
 
         // 8. Trigger async PDF generation
         documentService.generatePdfAsync(submission.getId());
+
+        // 9. Send confirmation email to submitter (async)
+        emailService.sendSubmissionConfirmation(submission, tenant);
+
+        // 10. Send alert to tenant admin if on Basic+ plan (async)
+        var plan = tenant.getPlan() != null
+            ? com.waiveliability.modules.billing.domain.Subscription.PlanType.valueOf(tenant.getPlan().toLowerCase())
+            : com.waiveliability.modules.billing.domain.Subscription.PlanType.free;
+        emailService.sendNewSubmissionAlert(submission, tenant, plan);
 
         return toResponse(submission);
     }
