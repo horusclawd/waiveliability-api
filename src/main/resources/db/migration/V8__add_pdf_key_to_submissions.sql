@@ -1,0 +1,1 @@
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS pdf_s3_key VARCHAR(512);

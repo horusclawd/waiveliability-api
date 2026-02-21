@@ -11,6 +11,7 @@ public record SubmissionResponse(
     String submitterEmail,
     Map<String, Object> formData,
     String signatureUrl,
+    String pdfUrl,
     String status,
     Instant submittedAt
 ) {}

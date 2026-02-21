@@ -37,6 +37,9 @@ public class Submission {
 
     private String signatureS3Key;
 
+    @Column(nullable = true)
+    private String pdfS3Key;
+
     private String status;
 
     private Instant submittedAt;
