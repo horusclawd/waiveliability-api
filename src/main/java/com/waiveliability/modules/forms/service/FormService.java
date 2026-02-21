@@ -85,6 +85,16 @@ public class FormService {
         return toFormResponse(form);
     }
 
+    @Transactional(readOnly = true)
+    public FormResponse getPublicForm(UUID tenantId, UUID formId) {
+        Form form = formRepository.findByIdAndTenantId(formId, tenantId)
+            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Form not found"));
+        if (!"published".equals(form.getStatus())) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "Form not available");
+        }
+        return toFormResponse(form);
+    }
+
     public FormResponse updateForm(UUID tenantId, UUID formId, UpdateFormRequest req) {
         Form form = formRepository.findByIdAndTenantId(formId, tenantId)
             .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Form not found"));
