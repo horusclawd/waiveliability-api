@@ -47,7 +47,7 @@ public class AdminSettingsController {
         Tenant tenant = tenantRepository.findById(tenantId)
             .orElseThrow(() -> new IllegalStateException("Tenant not found"));
 
-        // Validate: email required if notifications enabled (handled by @Email annotation + manual check)
+        // Validate: email required if notifications enabled
         if (Boolean.TRUE.equals(request.notificationsEnabled())
             && (request.notificationEmail() == null || request.notificationEmail().isBlank())) {
             throw new IllegalArgumentException("Notification email is required when notifications are enabled");
