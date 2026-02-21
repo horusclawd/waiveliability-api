@@ -13,4 +13,6 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID>, J
     Page<Submission> findByTenantId(UUID tenantId, Pageable pageable);
 
     Page<Submission> findByFormIdAndTenantId(UUID formId, UUID tenantId, Pageable pageable);
+
+    long countByTenantId(UUID tenantId);
 }
