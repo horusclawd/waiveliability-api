@@ -15,6 +15,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,6 +108,25 @@ public class DocumentService {
                     y -= 10;
 
                     if (y < MARGIN + 60) break; // avoid running off page
+                }
+
+                // Signature image
+                if (submission.getSignatureS3Key() != null && y > MARGIN + 100) {
+                    y -= 10;
+                    drawText(cs, "Signature:", fontBold, 10, MARGIN, y);
+                    y -= 6;
+                    try {
+                        byte[] sigBytes = s3Service.download(submission.getSignatureS3Key());
+                        PDImageXObject sigImage = PDImageXObject.createFromByteArray(doc, sigBytes, "signature");
+                        float sigWidth = Math.min(200f, CONTENT_WIDTH / 2);
+                        float sigHeight = sigWidth * sigImage.getHeight() / sigImage.getWidth();
+                        cs.drawImage(sigImage, MARGIN, y - sigHeight, sigWidth, sigHeight);
+                        y -= sigHeight + 10;
+                    } catch (Exception e) {
+                        log.warn("Could not embed signature for submission {}: {}", submission.getId(), e.getMessage());
+                        drawText(cs, "(signature unavailable)", fontSmall, 9, MARGIN + 12, y);
+                        y -= 14;
+                    }
                 }
 
                 y -= 10;
