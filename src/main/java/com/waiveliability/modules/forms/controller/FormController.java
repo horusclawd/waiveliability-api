@@ -2,7 +2,10 @@ package com.waiveliability.modules.forms.controller;
 
 import com.waiveliability.common.pagination.PageResponse;
 import com.waiveliability.modules.forms.dto.*;
+import com.waiveliability.modules.forms.service.DocumentImportService;
 import com.waiveliability.modules.forms.service.FormService;
+import com.waiveliability.security.CheckPlanLimit;
+import com.waiveliability.security.PlanFeature;
 import com.waiveliability.security.TenantContext;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +14,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.util.UUID;
@@ -21,6 +25,7 @@ import java.util.UUID;
 public class FormController {
 
     private final FormService formService;
+    private final DocumentImportService documentImportService;
 
     @GetMapping
     public ResponseEntity<PageResponse<FormSummaryResponse>> getForms(
@@ -72,5 +77,27 @@ public class FormController {
     @ResponseStatus(HttpStatus.CREATED)
     public FormResponse duplicateForm(@PathVariable UUID id) {
         return formService.duplicateForm(TenantContext.current(), id);
+    }
+
+    @PostMapping("/import")
+    @CheckPlanLimit(feature = PlanFeature.DOCUMENT_IMPORT)
+    public ResponseEntity<ImportPreviewResponse> importDocument(
+            @RequestParam("file") MultipartFile file
+    ) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        var fields = documentImportService.parseDocument(file);
+        String extractedText = fields.stream()
+                .map(DetectedField::getContent)
+                .filter(c -> c != null)
+                .reduce((a, b) -> a + "\n" + b)
+                .orElse("");
+
+        return ResponseEntity.ok(new ImportPreviewResponse(
+                file.getOriginalFilename(),
+                extractedText,
+                fields
+        ));
     }
 }
