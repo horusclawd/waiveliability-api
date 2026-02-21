@@ -45,13 +45,20 @@ public class StripeService {
         Tenant tenant = tenantRepository.findById(tenantId)
                 .orElseThrow(() -> new IllegalArgumentException("Tenant not found"));
 
-        String customerId = getOrCreateCustomer(tenant);
+        // Ensure subscription exists first
+        Subscription subscription = getOrCreateSubscription(tenantId);
 
+        String customerId = getOrCreateCustomer(tenant, tenantId);
+
+        // Create subscription with metadata to link back to tenant
         SessionCreateParams params = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                 .setCustomer(customerId)
                 .setSuccessUrl("https://waiveliability.com/billing/success?session_id={CHECKOUT_SESSION_ID}")
                 .setCancelUrl("https://waiveliability.com/billing/cancel")
+                .setSubscriptionData(SessionCreateParams.SubscriptionData.builder()
+                        .putMetadata("tenant_id", tenantId.toString())
+                        .build())
                 .addLineItem(SessionCreateParams.LineItem.builder()
                         .setPrice(priceId != null ? priceId : DEFAULT_PRICE_BASIC)
                         .setQuantity(1L)
@@ -59,6 +66,11 @@ public class StripeService {
                 .build();
 
         Session session = Session.create(params);
+
+        // Update subscription with Stripe IDs immediately
+        subscription.setStripeSubscriptionId(session.getSubscription());
+        subscription.setStripeCustomerId(customerId);
+        subscriptionRepository.save(subscription);
 
         return CheckoutResponse.builder()
                 .url(session.getUrl())
@@ -114,21 +126,31 @@ public class StripeService {
         String customerId = session.getCustomer();
         String subscriptionId = session.getSubscription();
 
-        Subscription subscription = subscriptionRepository.findByStripeCustomerId(customerId)
-                .orElseGet(() -> {
-                    // Find tenant by looking up subscription via Stripe metadata if needed
-                    // For now, this handler assumes the subscription was already created
-                    return null;
-                });
+        // First try to find by customer ID
+        Subscription subscription = subscriptionRepository.findByStripeCustomerId(customerId).orElse(null);
 
-        if (subscription != null) {
-            subscription.setStripeSubscriptionId(subscriptionId);
-            subscription.setStatus(SubscriptionStatus.active);
-            subscription.setCurrentPeriodStart(Instant.now());
-            subscription.setCurrentPeriodEnd(Instant.now().plusSeconds(30 * 24 * 60 * 60)); // 30 days
-            subscriptionRepository.save(subscription);
-            log.info("Subscription activated: {}", subscriptionId);
+        // If not found, try to find via subscription metadata
+        if (subscription == null && session.getSubscriptionObject() != null) {
+            String tenantIdStr = session.getSubscriptionObject().getMetadata().get("tenant_id");
+            if (tenantIdStr != null) {
+                UUID tenantId = UUID.fromString(tenantIdStr);
+                subscription = subscriptionRepository.findByTenantId(tenantId).orElse(null);
+            }
         }
+
+        // If still not found, log error - should not happen if checkout created subscription properly
+        if (subscription == null) {
+            log.error("Could not find subscription for checkout. Customer: {}, Subscription: {}", customerId, subscriptionId);
+            return;
+        }
+
+        subscription.setStripeSubscriptionId(subscriptionId);
+        subscription.setStripeCustomerId(customerId);
+        subscription.setStatus(SubscriptionStatus.active);
+        subscription.setCurrentPeriodStart(Instant.now());
+        subscription.setCurrentPeriodEnd(Instant.now().plusSeconds(30 * 24 * 60 * 60)); // 30 days
+        subscriptionRepository.save(subscription);
+        log.info("Subscription activated: {}", subscriptionId);
     }
 
     private void handleSubscriptionUpdated(Event event) {
@@ -196,18 +218,19 @@ public class StripeService {
                         .build());
     }
 
-    public String getOrCreateCustomer(Tenant tenant) {
-        return subscriptionRepository.findByTenantId(tenant.getId())
+    public String getOrCreateCustomer(Tenant tenant, UUID tenantId) {
+        return subscriptionRepository.findByTenantId(tenantId)
                 .map(Subscription::getStripeCustomerId)
-                .orElseGet(() -> createCustomer(tenant));
+                .orElseGet(() -> createCustomer(tenant, tenantId));
     }
 
-    private String createCustomer(Tenant tenant) {
+    private String createCustomer(Tenant tenant, UUID tenantId) {
         try {
             Customer customer = Customer.create(
                     com.stripe.param.CustomerCreateParams.builder()
                             .setEmail(tenant.getSlug() + "@waiveliability.com")
                             .setName(tenant.getName())
+                            .putMetadata("tenant_id", tenantId.toString())
                             .build()
             );
             return customer.getId();

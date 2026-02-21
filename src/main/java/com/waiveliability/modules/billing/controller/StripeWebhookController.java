@@ -22,8 +22,9 @@ public class StripeWebhookController {
             stripeService.handleWebhook(payload, sigHeader);
             return ResponseEntity.ok("OK");
         } catch (Exception e) {
-            log.error("Error handling Stripe webhook", e);
-            return ResponseEntity.badRequest().body("Webhook error: " + e.getMessage());
+            log.error("Error handling Stripe webhook: {}", e.getClass().getSimpleName());
+            // Return generic error to avoid leaking internal details
+            return ResponseEntity.badRequest().body("Webhook error");
         }
     }
 }
