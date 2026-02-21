@@ -143,7 +143,8 @@ public class TemplateService {
                 f.getPlaceholder(),
                 f.isRequired(),
                 f.getFieldOrder(),
-                deserializeOptions(f.getOptions())
+                deserializeOptions(f.getOptions()),
+                f.getContent()
             ))
             .toList();
         return new FormResponse(

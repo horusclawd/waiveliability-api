@@ -116,6 +116,7 @@ public class FormService {
                 .required(fieldReq.required())
                 .fieldOrder(fieldReq.fieldOrder())
                 .options(serializeOptions(fieldReq.options()))
+                .content(fieldReq.content())
                 .build();
             newFields.add(field);
         }
@@ -170,6 +171,7 @@ public class FormService {
                 .required(f.isRequired())
                 .fieldOrder(f.getFieldOrder())
                 .options(f.getOptions())
+                .content(f.getContent())
                 .build()
         ).toList();
         formFieldRepository.saveAll(copiedFields);
@@ -205,7 +207,8 @@ public class FormService {
             field.getPlaceholder(),
             field.isRequired(),
             field.getFieldOrder(),
-            options
+            options,
+            field.getContent()
         );
     }
 

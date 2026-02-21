@@ -12,5 +12,6 @@ public record FieldRequest(
     String placeholder,
     boolean required,
     int fieldOrder,
-    List<FormFieldOption> options
+    List<FormFieldOption> options,
+    String content
 ) {}
