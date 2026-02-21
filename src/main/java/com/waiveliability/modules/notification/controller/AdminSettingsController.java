@@ -47,15 +47,10 @@ public class AdminSettingsController {
         Tenant tenant = tenantRepository.findById(tenantId)
             .orElseThrow(() -> new IllegalStateException("Tenant not found"));
 
-        // Validate email if notifications are being enabled
-        if (request.notificationsEnabled() != null && request.notificationsEnabled()) {
-            if (request.notificationEmail() == null || request.notificationEmail().isBlank()) {
-                throw new IllegalArgumentException("Notification email is required when notifications are enabled");
-            }
-            // Basic email format validation
-            if (!request.notificationEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-                throw new IllegalArgumentException("Invalid email format");
-            }
+        // Validate: email required if notifications enabled
+        if (Boolean.TRUE.equals(request.notificationsEnabled())
+            && (request.notificationEmail() == null || request.notificationEmail().isBlank())) {
+            throw new IllegalArgumentException("Notification email is required when notifications are enabled");
         }
 
         tenant.setNotificationsEnabled(request.notificationsEnabled());
