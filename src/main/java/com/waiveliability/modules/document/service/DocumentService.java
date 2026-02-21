@@ -119,10 +119,11 @@ public class DocumentService {
                     if ("content".equals(field.getFieldType())) {
                         String content = field.getContent();
                         if (content != null && !content.isBlank()) {
-                            // Draw the content as a block of text (handle multi-line)
+                            // Draw the content label
                             y = drawText(cs, field.getLabel() + ":", fontBold, 10, MARGIN, y);
-                            y -= 4;
-                            y = drawWrappedText(cs, content, fontRegular, 9, MARGIN + 12, y);
+                            y -= 6;
+                            // Render HTML content with basic formatting
+                            y = drawHtmlContent(cs, content, fontRegular, fontBold, fontSmall, 9, MARGIN + 12, y);
                             y -= 12;
                         }
                         continue;
@@ -218,6 +219,47 @@ public class DocumentService {
         if (line.length() > 0) {
             y = drawText(cs, line.toString(), font, fontSize, x, y);
         }
+        return y;
+    }
+
+    private float drawHtmlContent(PDPageContentStream cs, String html, PDType1Font regularFont,
+                                  PDType1Font boldFont, PDType1Font italicFont, float fontSize,
+                                  float x, float y) throws Exception {
+        // Pre-process: convert <li> to bullet points and <br> to newlines
+        String text = html.replaceAll("<br\\s*/?>", "\n")
+                         .replaceAll("<li\\s*>", "\n• ")
+                         .replaceAll("</li>", "");
+
+        // Process line by line, tracking bold/italic state
+        String[] lines = text.split("\n");
+        boolean inBold = false;
+        boolean inItalic = false;
+
+        for (String rawLine : lines) {
+            if (rawLine.trim().isEmpty()) {
+                y -= 4;
+                continue;
+            }
+
+            // Track formatting state from opening/closing tags
+            inBold = inBold || rawLine.contains("<b>") || rawLine.contains("<strong>");
+            inItalic = inItalic || rawLine.contains("<i>") || rawLine.contains("<em>");
+
+            // Strip all HTML tags for display
+            String line = rawLine.replaceAll("<[^>]+>", "");
+
+            // Determine font based on formatting state
+            PDType1Font currentFont = regularFont;
+            if (inBold) currentFont = boldFont;
+            else if (inItalic) currentFont = italicFont;
+
+            y = drawWrappedText(cs, line, currentFont, fontSize, x, y);
+
+            // Reset state on closing tags
+            inBold = inBold && !(rawLine.contains("</b>") || rawLine.contains("</strong>"));
+            inItalic = inItalic && !(rawLine.contains("</i>") || rawLine.contains("</em>"));
+        }
+
         return y;
     }
 
