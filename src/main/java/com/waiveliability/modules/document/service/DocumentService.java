@@ -115,6 +115,19 @@ public class DocumentService {
 
                 // Field answers
                 for (FormField field : fields) {
+                    // Content fields: display the static content text instead of user answer
+                    if ("content".equals(field.getFieldType())) {
+                        String content = field.getContent();
+                        if (content != null && !content.isBlank()) {
+                            // Draw the content as a block of text (handle multi-line)
+                            y = drawText(cs, field.getLabel() + ":", fontBold, 10, MARGIN, y);
+                            y -= 4;
+                            y = drawWrappedText(cs, content, fontRegular, 9, MARGIN + 12, y);
+                            y -= 12;
+                        }
+                        continue;
+                    }
+
                     String answer = getAnswerString(answers, field);
                     y = drawText(cs, field.getLabel() + ":", fontBold, 10, MARGIN, y);
                     y -= 2;
@@ -175,6 +188,37 @@ public class DocumentService {
         cs.showText(safe);
         cs.endText();
         return y - fontSize - 4;
+    }
+
+    private float drawWrappedText(PDPageContentStream cs, String text, PDType1Font font,
+                                   float fontSize, float x, float y) throws Exception {
+        // Approximate characters per line based on content width and font size
+        int charsPerLine = (int) (CONTENT_WIDTH / (fontSize * 0.5f));
+        String[] words = text.split("\\s+");
+        StringBuilder line = new StringBuilder();
+
+        for (String word : words) {
+            if (line.length() + word.length() + 1 > charsPerLine) {
+                // Draw current line
+                if (line.length() > 0) {
+                    y = drawText(cs, line.toString(), font, fontSize, x, y);
+                    line = new StringBuilder();
+                }
+                // Check if we need a new page
+                if (y < MARGIN + 40) {
+                    return y;
+                }
+            }
+            if (line.length() > 0) {
+                line.append(" ");
+            }
+            line.append(word);
+        }
+        // Draw remaining line
+        if (line.length() > 0) {
+            y = drawText(cs, line.toString(), font, fontSize, x, y);
+        }
+        return y;
     }
 
     private String getAnswerString(Map<String, Object> answers, FormField field) {

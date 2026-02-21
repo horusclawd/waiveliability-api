@@ -40,4 +40,7 @@ public class FormField extends AuditableEntity {
 
     @Column(columnDefinition = "jsonb")
     private String options;
+
+    @Column(columnDefinition = "TEXT")
+    private String content;
 }
