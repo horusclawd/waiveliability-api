@@ -99,6 +99,20 @@ public class DocumentService {
                 cs.stroke();
                 y -= 16;
 
+                // Submitter info
+                if (submission.getSubmitterName() != null || submission.getSubmitterEmail() != null) {
+                    y = drawText(cs, "Submitted by:", fontBold, 10, MARGIN, y);
+                    y -= 2;
+                    if (submission.getSubmitterName() != null) {
+                        y = drawText(cs, "Name: " + submission.getSubmitterName(), fontRegular, 10, MARGIN + 12, y);
+                        y -= 8;
+                    }
+                    if (submission.getSubmitterEmail() != null) {
+                        y = drawText(cs, "Email: " + submission.getSubmitterEmail(), fontRegular, 10, MARGIN + 12, y);
+                        y -= 14;
+                    }
+                }
+
                 // Field answers
                 for (FormField field : fields) {
                     String answer = getAnswerString(answers, field);
