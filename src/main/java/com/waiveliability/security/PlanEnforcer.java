@@ -65,6 +65,7 @@ public class PlanEnforcer {
             case UNLIMITED_FORMS -> enforcePremium(plan, feature);
             case UNLIMITED_SUBMISSIONS -> enforcePremium(plan, feature);
             case CUSTOM_DOMAIN -> enforceEnterprise(plan, feature);
+            case DOCUMENT_IMPORT -> enforceBasicOrHigher(plan, feature);
             default -> log.debug("No limit check for feature: {}", feature);
         }
     }

@@ -57,6 +57,9 @@ dependencies {
     // PDF
     implementation("org.apache.pdfbox:pdfbox:3.0.3")
 
+    // Document parsing (docx)
+    implementation("org.apache.poi:poi-ooxml:5.2.5")
+
     // OpenAPI / Swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
