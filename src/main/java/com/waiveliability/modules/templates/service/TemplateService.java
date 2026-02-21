@@ -79,6 +79,7 @@ public class TemplateService {
                 .required(tf.isRequired())
                 .fieldOrder(tf.getFieldOrder())
                 .options(tf.getOptions())
+                .content(tf.getContent())
                 .build()
         ).toList();
         formFieldRepository.saveAll(fields);

@@ -35,4 +35,7 @@ public class TemplateField {
     private int fieldOrder;
 
     private String options;
+
+    @Column(columnDefinition = "TEXT")
+    private String content;
 }
