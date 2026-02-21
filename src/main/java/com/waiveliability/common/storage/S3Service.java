@@ -4,13 +4,17 @@ import com.waiveliability.config.S3Config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 
@@ -39,6 +43,23 @@ public class S3Service {
         s3Client.putObject(putRequest, RequestBody.fromInputStream(inputStream, contentLength));
         log.debug("Uploaded S3 object: bucket={}, key={}", bucket, key);
         return key;
+    }
+
+    /**
+     * Downloads an object from S3 and returns its bytes.
+     */
+    public byte[] download(String key) throws IOException {
+        String bucket = s3Config.getS3().getBucket();
+
+        GetObjectRequest getRequest = GetObjectRequest.builder()
+            .bucket(bucket)
+            .key(key)
+            .build();
+
+        try (ResponseInputStream<GetObjectResponse> response = s3Client.getObject(getRequest)) {
+            log.debug("Downloaded S3 object: bucket={}, key={}", bucket, key);
+            return response.readAllBytes();
+        }
     }
 
     /**

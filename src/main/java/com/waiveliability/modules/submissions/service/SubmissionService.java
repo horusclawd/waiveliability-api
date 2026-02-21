@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.waiveliability.common.exception.ApiException;
 import com.waiveliability.common.pagination.PageResponse;
 import com.waiveliability.common.storage.S3Service;
+import com.waiveliability.modules.document.service.DocumentService;
 import com.waiveliability.modules.forms.domain.Form;
 import com.waiveliability.modules.forms.domain.FormField;
 import com.waiveliability.modules.forms.repository.FormFieldRepository;
@@ -40,6 +41,7 @@ public class SubmissionService {
     private final TenantRepository tenantRepository;
     private final S3Service s3Service;
     private final ObjectMapper objectMapper;
+    private final DocumentService documentService;
 
     public SubmissionResponse submitForm(String tenantSlug, UUID formId, SubmitFormRequest req) {
         // 1. Look up tenant by slug
@@ -89,6 +91,9 @@ public class SubmissionService {
             .status("pending")
             .build();
         submissionRepository.save(submission);
+
+        // 8. Trigger async PDF generation
+        documentService.generatePdfAsync(submission.getId());
 
         return toResponse(submission);
     }
@@ -176,6 +181,12 @@ public class SubmissionService {
                 signatureUrl = s3Service.generateSignedUrl(s.getSignatureS3Key(), Duration.ofSeconds(900));
             } catch (Exception ignored) {}
         }
+        String pdfUrl = null;
+        if (s.getPdfS3Key() != null) {
+            try {
+                pdfUrl = s3Service.generateSignedUrl(s.getPdfS3Key(), Duration.ofSeconds(900));
+            } catch (Exception ignored) {}
+        }
         return new SubmissionResponse(
             s.getId(),
             s.getForm().getId(),
@@ -183,6 +194,7 @@ public class SubmissionService {
             s.getSubmitterEmail(),
             deserializeAnswers(s.getFormData()),
             signatureUrl,
+            pdfUrl,
             s.getStatus(),
             s.getSubmittedAt()
         );
