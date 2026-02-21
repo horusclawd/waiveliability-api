@@ -151,14 +151,14 @@ public class SubmissionService {
             try {
                 s3Service.delete(submission.getSignatureS3Key());
             } catch (Exception e) {
-                log.warn("Failed to delete signature S3 object: {}", submission.getSignatureS3Key(), e);
+                log.error("Failed to delete signature S3 object: {}", submission.getSignatureS3Key(), e);
             }
         }
         if (submission.getPdfS3Key() != null) {
             try {
                 s3Service.delete(submission.getPdfS3Key());
             } catch (Exception e) {
-                log.warn("Failed to delete PDF S3 object: {}", submission.getPdfS3Key(), e);
+                log.error("Failed to delete PDF S3 object: {}", submission.getPdfS3Key(), e);
             }
         }
 
@@ -177,7 +177,10 @@ public class SubmissionService {
         }
 
         Specification<Submission> spec = buildSpecification(tenantId, formId, status, submitterName, startDate, endDate);
-        List<Submission> submissions = submissionRepository.findAll(spec);
+        // Limit to prevent memory exhaustion - export largest reasonable dataset
+        org.springframework.data.domain.Pageable exportPageable =
+            org.springframework.data.domain.PageRequest.of(0, 10000);
+        List<Submission> submissions = submissionRepository.findAll(spec, exportPageable).getContent();
 
         // Write CSV header
         writer.println("id,form_id,submitter_name,submitter_email,status,submitted_at");
@@ -221,7 +224,7 @@ public class SubmissionService {
 
     private String escapeCsv(String value) {
         if (value == null) return "";
-        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+        if (value.contains(",") || value.contains("\"") || value.contains("\n") || value.contains("\r")) {
             return "\"" + value.replace("\"", "\"\"") + "\"";
         }
         return value;

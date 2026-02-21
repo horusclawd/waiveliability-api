@@ -11,15 +11,24 @@ public final class SubmissionSpecifications {
     private SubmissionSpecifications() {}
 
     public static Specification<Submission> hasTenantId(UUID tenantId) {
-        return (root, query, cb) -> cb.equal(root.get("tenant").get("id"), tenantId);
+        return (root, query, cb) -> {
+            if (tenantId == null) return null;
+            return cb.equal(root.get("tenant").get("id"), tenantId);
+        };
     }
 
     public static Specification<Submission> hasFormId(UUID formId) {
-        return (root, query, cb) -> cb.equal(root.get("form").get("id"), formId);
+        return (root, query, cb) -> {
+            if (formId == null) return null;
+            return cb.equal(root.get("form").get("id"), formId);
+        };
     }
 
     public static Specification<Submission> hasStatus(String status) {
-        return (root, query, cb) -> cb.equal(root.get("status"), status);
+        return (root, query, cb) -> {
+            if (status == null) return null;
+            return cb.equal(root.get("status"), status);
+        };
     }
 
     public static Specification<Submission> submitterNameContains(String name) {
