@@ -126,6 +126,19 @@ public class SubmissionService {
         return toResponse(s);
     }
 
+    @Transactional(readOnly = true)
+    public SubmissionResponse getPublicSubmission(String tenantSlug, UUID submissionId) {
+        // Look up tenant by slug
+        var tenant = tenantRepository.findBySlug(tenantSlug)
+            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Tenant not found"));
+
+        // Look up submission by ID and tenant
+        Submission s = submissionRepository.findById(submissionId)
+            .filter(sub -> sub.getTenant().getId().equals(tenant.getId()))
+            .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Submission not found"));
+        return toResponse(s);
+    }
+
     public SubmissionResponse updateStatus(UUID tenantId, UUID id, String status) {
         if (!VALID_STATUSES.contains(status)) {
             throw new ApiException(HttpStatus.BAD_REQUEST,

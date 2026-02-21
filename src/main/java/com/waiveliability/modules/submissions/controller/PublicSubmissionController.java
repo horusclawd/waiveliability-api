@@ -1,5 +1,6 @@
 package com.waiveliability.modules.submissions.controller;
 
+import com.waiveliability.common.exception.ApiException;
 import com.waiveliability.common.ratelimit.RateLimiterService;
 import com.waiveliability.modules.submissions.dto.SubmissionResponse;
 import com.waiveliability.modules.submissions.dto.SubmitFormRequest;
@@ -31,6 +32,13 @@ public class PublicSubmissionController {
         rateLimiterService.checkRateLimit(clientIp);
 
         return submissionService.submitForm(tenantSlug, formId, req);
+    }
+
+    @GetMapping("/submissions/{submissionId}")
+    public SubmissionResponse getSubmission(
+        @PathVariable String tenantSlug,
+        @PathVariable UUID submissionId) {
+        return submissionService.getPublicSubmission(tenantSlug, submissionId);
     }
 
     private String getClientIp(HttpServletRequest request) {
